@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<title>Phonemesh</title>
+<!--
+  The add-me link: https://tranquil-flow.github.io/phonemesh/add#<card>. The card after # never reaches this website
+  (browsers do not send it). With Phonemesh installed, Android opens the app straight away (App Link). Without it, or
+  when the App Link check has not passed, this page shows. It loads nothing from anywhere, keeps nothing and sends
+  nothing: no fonts, no counters, no analytics. The "Open" button hands the card to the app on the phone only.
+-->
+<style>
+  body{margin:0;font-family:system-ui,Roboto,sans-serif;background:#fff;color:#111;line-height:1.35}
+  main{max-width:420px;margin:0 auto;padding:24px 20px 40px}
+  h1{font-size:28px;margin:8px 0 4px}
+  p{font-size:19px;margin:10px 0}
+  .who{display:flex;align-items:center;gap:14px;margin:18px 0}
+  .dot{width:48px;height:48px;border-radius:50%;border:2px solid #111;flex:none}
+  .name{font-size:26px;font-weight:800;word-break:break-word}
+  a.b{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border:2px solid #111;border-radius:12px;
+      font-size:19px;font-weight:700;color:#111;text-decoration:none;margin:12px 0;padding:0 14px}
+  a.b.fill{background:#111;color:#fff}
+  .en{color:#555;font-size:16px}
+  .bad{color:#c62828;font-weight:700}
+  svg{flex:none}
+</style>
+<main>
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="7" y="2" width="10" height="20" rx="2" fill="#ffca28"/><path d="M10 18h4"/></svg>
+  <h1 id="title">Quelqu'un veut vous parler</h1>
+  <p class="en" id="title_en">Someone wants to talk to you</p>
+  <div class="who" id="who" hidden><div class="dot" id="dot"></div><div class="name" id="name"></div></div>
+
+  <div id="open_box">
+    <a class="b fill" id="open" href="#">Ouvrir Phonemesh</a>
+    <p class="en">Open Phonemesh</p>
+  </div>
+  <a class="b" href="https://github.com/Tranquil-Flow/phonemesh/releases/tag/v0.1.0" rel="noreferrer noopener">Télécharger Phonemesh</a>
+  <p class="en">Download Phonemesh</p>
+  <p>Pas encore Phonemesh ? Demandez-le à un ami.</p>
+  <p class="en">No Phonemesh yet? Ask a friend for it.</p>
+  <p>Votre ami touche Réglages, puis « Partager l'application ».</p>
+  <p class="en">Your friend taps Settings, then “Share the app”.</p>
+  <p class="bad" id="broken" hidden>Ce lien est abîmé. Demandez-en un autre.<br><span class="en">This link is damaged. Ask for another.</span></p>
+</main>
+<script>
+  // Reads the card from the part after #, on this phone only, to show the name and colour, and to build the button
+  // that opens the app with it. Same layout as ContactCard v1 in the app: version 1, key type 1, then two 33-byte
+  // keys and a 64-byte signature, then the name length, the name and the colour. A QR code's text adds 33 bytes.
+  const COLOURS=['#E53935','#FB8C00','#FDD835','#43A047','#1E88E5','#8E24AA','#EC407A','#6D4C41'];
+  const card=location.hash.slice(1);
+  let ok=false;
+  try{
+    if(card.length>276 || card.length%4===1 || !/^[A-Za-z0-9_-]+$/.test(card)) throw 0;
+    const b=Uint8Array.from(atob(card.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+    if(b[0]!==1||b[1]!==1||b.length<135) throw 0;
+    const n=b[132]; if(n<1||n>40||(b.length!==134+n && b.length!==167+n)) throw 0;
+    const name=new TextDecoder('utf-8',{fatal:true}).decode(b.slice(133,133+n));
+    if(name.normalize('NFC')!==name || /[\x00-\x1f\x7f]/.test(name)) throw 0;
+    document.getElementById('name').textContent=name;
+    document.getElementById('dot').style.background=COLOURS[b[133+n]]||'#9E9E9E';
+    document.getElementById('who').hidden=false;
+    document.getElementById('title').textContent=name+' veut vous parler';
+    document.getElementById('title_en').textContent=name+' wants to talk to you';
+    ok=true;
+  }catch(e){}
+  if(ok){
+    // Chrome hands this to the app even when the App Link is not verified; the card goes as an extra, never to a server.
+    document.getElementById('open').href='intent://tranquil-flow.github.io/phonemesh/add#Intent;scheme=https;package=org.phonemesh.app;S.card='+card+';end';
+  }else{
+    document.getElementById('open_box').hidden=true;
+    document.getElementById('broken').hidden=!card;
+  }
+</script>
+</html>
