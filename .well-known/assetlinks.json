@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "org.phonemesh.app",
+      "sha256_cert_fingerprints": [
+        "EF:85:57:C6:13:3A:62:38:8C:52:63:CC:26:55:2D:4E:D3:B0:36:AC:CE:26:7A:0B:84:1A:57:BB:DF:5E:CD:AC"
+      ]
+    }
+  }
+]
